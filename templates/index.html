@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#292e2a">
+  <title>Diagnosis Mesin | Sistem Pakar</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Navigation reflects a focused internal maintenance tool. -->
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Sistem Pakar, beranda">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="brand-copy"><strong>Plant systems</strong><small>MAINTENANCE DESK</small></span>
+      </a>
+      <div class="nav-label">WORKSPACE</div>
+      <nav aria-label="Navigasi utama">
+        <a class="nav-item active" href="#diagnosis" aria-current="page">
+          <span class="nav-symbol" aria-hidden="true">01</span>
+          <span>Diagnosis mesin</span>
+        </a>
+      </nav>
+      <div class="sidebar-status">
+        <span class="status-light" aria-hidden="true"></span>
+        <div><strong>Rule engine siap</strong><small>Dataset AI4I 2020</small></div>
+      </div>
+      <div class="sidebar-footer"><span>SISTEM PAKAR</span><span>PROTOTIPE</span></div>
+    </aside>
+
+    <!-- Main operator workspace: sensor entry, decision, and rule explanation. -->
+    <main class="main-content" id="diagnosis">
+      <header class="topbar">
+        <div class="breadcrumb"><span>Maintenance</span><b>/</b><strong>Diagnosis kondisi</strong></div>
+        <div class="environment-tag"><span></span> MODE DEMO</div>
+      </header>
+
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">MES · CONDITION MONITORING</p>
+          <h1>Diagnosis kondisi mesin</h1>
+          <p class="page-description">Masukkan pembacaan sensor untuk memeriksa indikasi kegagalan dan kebutuhan tindakan.</p>
+        </div>
+        <div class="source-label"><span>DATA ACUAN</span><strong>AI4I 2020</strong></div>
+      </section>
+
+      <div class="dashboard-grid">
+        <!-- Sensor form uses familiar names, units, and direct numeric fields. -->
+        <section class="panel input-panel" aria-labelledby="input-title">
+          <div class="panel-heading">
+            <div class="heading-index">01</div>
+            <div><h2 id="input-title">Pembacaan sensor</h2><p>Isi seluruh parameter mesin</p></div>
+          </div>
+          <form id="diagnosis-form">
+            <div class="form-grid">
+              <label class="field">
+                <span>Air temperature <small>K</small></span>
+                <input type="number" name="air_temp" step="any" min="0.01" value="298.1" required>
+              </label>
+              <label class="field">
+                <span>Process temperature <small>K</small></span>
+                <input type="number" name="process_temp" step="any" min="0.01" value="308.6" required>
+              </label>
+              <label class="field">
+                <span>Rotational speed <small>RPM</small></span>
+                <input type="number" name="rpm" step="any" min="0" value="1500" required>
+              </label>
+              <label class="field">
+                <span>Torque <small>Nm</small></span>
+                <input type="number" name="torque" step="any" min="0" value="40" required>
+              </label>
+              <label class="field">
+                <span>Tool wear <small>menit</small></span>
+                <input type="number" name="tool_wear" step="any" min="0" value="100" required>
+              </label>
+              <label class="field">
+                <span>Tipe produk</span>
+                <select name="product_type" required>
+                  <option value="L">L — Low</option>
+                  <option value="M" selected>M — Medium</option>
+                  <option value="H">H — High</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-actions">
+              <span class="form-note"><span aria-hidden="true">i</span> Data hanya diproses untuk diagnosis ini.</span>
+              <button type="submit" id="submit-button">
+                <span class="button-glyph" aria-hidden="true">→</span>
+                <span>Diagnosis</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Status, derived facts, recommendations, and ERP handoff. -->
+        <section class="panel result-panel" aria-labelledby="result-title" aria-live="polite">
+          <div class="panel-heading">
+            <div class="heading-index">02</div>
+            <div><h2 id="result-title">Hasil pemeriksaan</h2><p>Ringkasan kondisi dan tindakan</p></div>
+          </div>
+          <div class="empty-state" id="empty-state">
+            <span class="empty-rule" aria-hidden="true"></span>
+            <strong>Belum ada hasil</strong>
+            <p>Jalankan diagnosis untuk menampilkan status dan rekomendasi.</p>
+          </div>
+          <div class="result-content hidden" id="result-content">
+            <div class="status-banner status--normal" id="status-banner">
+              <span class="status-mark" aria-hidden="true"></span>
+              <div class="status-copy"><span>STATUS MESIN</span><strong id="status-label">NORMAL</strong></div>
+              <p id="status-meta"></p>
+            </div>
+            <div class="facts-heading"><span>FAKTA TURUNAN</span><span>HASIL PERHITUNGAN</span></div>
+            <div class="fact-grid">
+              <div class="fact-card"><span>Selisih suhu <b>ΔT</b></span><strong id="fact-delta">—</strong><small>K</small></div>
+              <div class="fact-card"><span>Daya <b>P</b></span><strong id="fact-power">—</strong><small>W</small></div>
+              <div class="fact-card"><span>Strain <b>S</b></span><strong id="fact-strain">—</strong><small>Nm·min</small></div>
+            </div>
+            <div class="recommendation-block">
+              <h3>Rekomendasi tindakan</h3>
+              <ul id="recommendations"></ul>
+            </div>
+            <div class="work-order hidden" id="work-order"></div>
+          </div>
+          <div class="error-message hidden" id="error-message" role="alert"></div>
+        </section>
+      </div>
+
+      <!-- Explainable output makes the inferred facts and fired rules auditable. -->
+      <section class="panel trace-panel" aria-labelledby="trace-title">
+        <div class="trace-heading">
+          <div class="panel-heading">
+            <div class="heading-index">03</div>
+            <div><h2 id="trace-title">Jejak aturan</h2><p>Forward chaining · fakta turunan dan aturan terpicu</p></div>
+          </div>
+          <span class="trace-count" id="trace-count">MENUNGGU DIAGNOSIS</span>
+        </div>
+        <div class="trace-body" id="trace-body">
+          <p class="trace-empty">Penjelasan proses inferensi akan muncul di sini.</p>
+        </div>
+      </section>
+      <footer class="page-footer">
+        <span>Forward chaining dua tingkat</span>
+        <span>Work Order ERP pada prototipe ini bersifat simulasi.</span>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Send form values to Flask and update the status, facts, actions, and trace.
+    const form = document.getElementById("diagnosis-form");
+    const submitButton = document.getElementById("submit-button");
+    const numberFormat = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 2 });
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearError();
+      submitButton.disabled = true;
+      submitButton.innerHTML = '<span class="spinner" aria-hidden="true"></span><span>Memeriksa...</span>';
+
+      const payload = Object.fromEntries(new FormData(form).entries());
+      try {
+        const response = await fetch("/api/diagnose", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Diagnosis tidak dapat diproses.");
+        renderResult(result);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<span class="button-glyph" aria-hidden="true">→</span><span>Diagnosis</span>';
+      }
+    });
+
+    // Render only escaped API text; fixed visual classes come from known status values.
+    function renderResult(result) {
+      document.getElementById("empty-state").classList.add("hidden");
+      document.getElementById("result-content").classList.remove("hidden");
+      const banner = document.getElementById("status-banner");
+      banner.className = `status-banner status--${result.status.toLowerCase()}`;
+      document.getElementById("status-label").textContent = result.status_label;
+      document.getElementById("status-meta").textContent =
+        result.status === "NORMAL" ? "Parameter berada dalam rentang aturan." :
+        result.failure_modes.length ? `${result.failure_modes.length} aturan kegagalan terpicu.` :
+        "Ambang peringatan tool wear tercapai.";
+
+      document.getElementById("fact-delta").textContent = numberFormat.format(result.facts.delta_t);
+      document.getElementById("fact-power").textContent = numberFormat.format(result.facts.power);
+      document.getElementById("fact-strain").textContent = numberFormat.format(result.facts.strain);
+      document.getElementById("recommendations").innerHTML = result.recommendations
+        .map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+
+      const workOrder = document.getElementById("work-order");
+      if (result.work_order) {
+        workOrder.classList.remove("hidden");
+        workOrder.innerHTML = `
+          <div class="wo-symbol" aria-hidden="true">WO</div>
+          <div class="wo-copy"><strong>Work Order ERP disiapkan</strong>
+            <span>${escapeHtml(result.work_order.work_order_id)} · ${escapeHtml(result.work_order.description)}</span></div>
+          <span class="wo-priority">${escapeHtml(result.work_order.priority)}</span>`;
+      } else {
+        workOrder.classList.add("hidden");
+        workOrder.innerHTML = "";
+      }
+
+      document.getElementById("trace-count").textContent =
+        `${result.triggered_rules.length} ATURAN TERPICU`;
+      document.getElementById("trace-body").innerHTML = result.reasoning_trace.map((item, index) => {
+        const isRule = /^R[1-4]$/.test(item.id);
+        const state = isRule ? "TERPICU" : item.id.startsWith("F") ? "DITURUNKAN" : "KESIMPULAN";
+        return `
+          <div class="trace-row ${isRule ? "trace-fired" : ""}">
+            <span class="trace-number">${String(index + 1).padStart(2, "0")}</span>
+            <div class="trace-detail">
+              <strong>${escapeHtml(item.id)} <span>·</span> ${escapeHtml(item.rule)}</strong>
+              <p>${escapeHtml(item.explanation)}</p>
+            </div>
+            <span class="trace-state">${state}</span>
+          </div>`;
+      }).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+      })[character]);
+    }
+
+    function showError(message) {
+      const element = document.getElementById("error-message");
+      element.textContent = message;
+      element.classList.remove("hidden");
+    }
+
+    function clearError() {
+      const element = document.getElementById("error-message");
+      element.textContent = "";
+      element.classList.add("hidden");
+    }
+  </script>
+</body>
+</html>
