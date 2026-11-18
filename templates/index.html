@@ -3,145 +3,210 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#292e2a">
+  <meta name="theme-color" content="#0f1215">
   <title>Diagnosis Mesin | Sistem Pakar</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <div class="app-shell">
-    <!-- Navigation reflects a focused internal maintenance tool. -->
-    <aside class="sidebar">
-      <a class="brand" href="/" aria-label="Sistem Pakar, beranda">
+    <header class="system-bar">
+      <a class="system-brand" href="/" aria-label="Sistem Pakar, beranda">
         <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-        <span class="brand-copy"><strong>Plant systems</strong><small>MAINTENANCE DESK</small></span>
+        <span><strong>SISTEM PAKAR</strong><small>MAINTENANCE CONTROL / 01</small></span>
       </a>
-      <div class="nav-label">WORKSPACE</div>
-      <nav aria-label="Navigasi utama">
-        <a class="nav-item active" href="#diagnosis" aria-current="page">
-          <span class="nav-symbol" aria-hidden="true">01</span>
-          <span>Diagnosis mesin</span>
-        </a>
-      </nav>
-      <div class="sidebar-status">
-        <span class="status-light" aria-hidden="true"></span>
-        <div><strong>Rule engine siap</strong><small>Dataset AI4I 2020</small></div>
+      <div class="system-state" aria-label="Status sistem">
+        <span class="led led--online" aria-hidden="true"></span>
+        <span class="system-online">ONLINE</span>
+        <span class="state-divider">•</span>
+        <span>MES/ERP LINKED</span>
       </div>
-      <div class="sidebar-footer"><span>SISTEM PAKAR</span><span>PROTOTIPE</span></div>
-    </aside>
+      <div class="dataset-chip"><span>DATASET</span><strong>AI4I-2020</strong></div>
+    </header>
 
-    <!-- Main operator workspace: sensor entry, decision, and rule explanation. -->
     <main class="main-content" id="diagnosis">
-      <header class="topbar">
-        <div class="breadcrumb"><span>Maintenance</span><b>/</b><strong>Diagnosis kondisi</strong></div>
-        <div class="environment-tag"><span></span> MODE DEMO</div>
-      </header>
-
       <section class="page-heading">
         <div>
-          <p class="eyebrow">MES · CONDITION MONITORING</p>
-          <h1>Diagnosis kondisi mesin</h1>
-          <p class="page-description">Masukkan pembacaan sensor untuk memeriksa indikasi kegagalan dan kebutuhan tindakan.</p>
+          <p class="eyebrow"><span class="eyebrow-mark"></span> CNC / MILLING / CONDITION MONITORING</p>
+          <h1>Panel Diagnosis Mesin</h1>
+          <p class="page-description">Pemantauan kondisi dan indikasi kegagalan berbasis aturan forward chaining.</p>
         </div>
-        <div class="source-label"><span>DATA ACUAN</span><strong>AI4I 2020</strong></div>
+        <div class="machine-identity">
+          <span>UNIT TERPANTAU</span>
+          <strong><i aria-hidden="true"></i> CNC-MILL-01</strong>
+          <small>MODE OPERASI / DEMO</small>
+        </div>
       </section>
 
       <div class="dashboard-grid">
-        <!-- Sensor form uses familiar names, units, and direct numeric fields. -->
         <section class="panel input-panel" aria-labelledby="input-title">
           <div class="panel-heading">
             <div class="heading-index">01</div>
-            <div><h2 id="input-title">Pembacaan sensor</h2><p>Isi seluruh parameter mesin</p></div>
+            <div><p class="section-kicker">INPUT / SENSOR BUS</p><h2 id="input-title">Parameter Mesin</h2></div>
+            <span class="panel-code">IN-01</span>
           </div>
+
           <form id="diagnosis-form">
-            <div class="form-grid">
-              <label class="field">
-                <span>Air temperature <small>K</small></span>
-                <input type="number" name="air_temp" step="any" min="0.01" value="298.1" required>
-              </label>
-              <label class="field">
-                <span>Process temperature <small>K</small></span>
-                <input type="number" name="process_temp" step="any" min="0.01" value="308.6" required>
-              </label>
-              <label class="field">
-                <span>Rotational speed <small>RPM</small></span>
-                <input type="number" name="rpm" step="any" min="0" value="1500" required>
-              </label>
-              <label class="field">
-                <span>Torque <small>Nm</small></span>
-                <input type="number" name="torque" step="any" min="0" value="40" required>
-              </label>
-              <label class="field">
-                <span>Tool wear <small>menit</small></span>
-                <input type="number" name="tool_wear" step="any" min="0" value="100" required>
-              </label>
-              <label class="field">
-                <span>Tipe produk</span>
-                <select name="product_type" required>
-                  <option value="L">L — Low</option>
-                  <option value="M" selected>M — Medium</option>
-                  <option value="H">H — High</option>
-                </select>
-              </label>
+            <fieldset class="sensor-group">
+              <legend><span class="group-index">A</span> Parameter Termal</legend>
+              <div class="form-grid">
+                <label class="field" for="air_temp">
+                  <span class="field-label">Air temperature</span>
+                  <span class="input-shell">
+                    <input id="air_temp" type="number" name="air_temp" step="any" min="0.01" value="298.1" required>
+                    <span class="unit-badge">[K]</span>
+                  </span>
+                </label>
+                <label class="field" for="process_temp">
+                  <span class="field-label">Process temperature</span>
+                  <span class="input-shell">
+                    <input id="process_temp" type="number" name="process_temp" step="any" min="0.01" value="308.6" required>
+                    <span class="unit-badge">[K]</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="sensor-group">
+              <legend><span class="group-index">B</span> Parameter Mekanis</legend>
+              <div class="form-grid">
+                <label class="field" for="rpm">
+                  <span class="field-label">Rotational speed</span>
+                  <span class="input-shell">
+                    <input id="rpm" type="number" name="rpm" step="any" min="0" value="1500" required>
+                    <span class="unit-badge">[RPM]</span>
+                  </span>
+                </label>
+                <label class="field" for="torque">
+                  <span class="field-label">Torque</span>
+                  <span class="input-shell">
+                    <input id="torque" type="number" name="torque" step="any" min="0" value="40" required>
+                    <span class="unit-badge">[Nm]</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="sensor-group">
+              <legend><span class="group-index">C</span> Kondisi Pahat</legend>
+              <div class="form-grid">
+                <label class="field" for="tool_wear">
+                  <span class="field-label">Akumulasi keausan</span>
+                  <span class="input-shell">
+                    <input id="tool_wear" type="number" name="tool_wear" step="any" min="0" value="100" required>
+                    <span class="unit-badge">[MIN]</span>
+                  </span>
+                </label>
+                <label class="field" for="product_type">
+                  <span class="field-label">Tipe produk</span>
+                  <span class="input-shell select-shell">
+                    <select id="product_type" name="product_type" required>
+                      <option value="L">L — Low</option>
+                      <option value="M" selected>M — Medium</option>
+                      <option value="H">H — High</option>
+                    </select>
+                    <span class="unit-badge">[TYPE]</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="preset-section">
+              <div class="preset-heading"><span>SIMULASI CEPAT</span><span>LOAD PRESET / NO AUTO RUN</span></div>
+              <div class="preset-buttons">
+                <button class="preset-button preset--normal" type="button" data-preset="normal">
+                  <span class="preset-led" aria-hidden="true"></span> Simulasi Normal
+                </button>
+                <button class="preset-button preset--warning" type="button" data-preset="warning">
+                  <span class="preset-led" aria-hidden="true"></span> Simulasi Peringatan
+                </button>
+                <button class="preset-button preset--failure" type="button" data-preset="failure">
+                  <span class="preset-led" aria-hidden="true"></span> Simulasi Failure
+                </button>
+              </div>
             </div>
+
             <div class="form-actions">
-              <span class="form-note"><span aria-hidden="true">i</span> Data hanya diproses untuk diagnosis ini.</span>
+              <span class="form-note"><span class="note-mark">i</span> Input diproses untuk diagnosis ini saja.</span>
               <button type="submit" id="submit-button">
-                <span class="button-glyph" aria-hidden="true">→</span>
-                <span>Diagnosis</span>
+                <span class="button-glyph" aria-hidden="true">▶</span>
+                <span>DIAGNOSIS MESIN</span>
               </button>
             </div>
           </form>
         </section>
 
-        <!-- Status, derived facts, recommendations, and ERP handoff. -->
         <section class="panel result-panel" aria-labelledby="result-title" aria-live="polite">
           <div class="panel-heading">
             <div class="heading-index">02</div>
-            <div><h2 id="result-title">Hasil pemeriksaan</h2><p>Ringkasan kondisi dan tindakan</p></div>
+            <div><p class="section-kicker">OUTPUT / DIAGNOSTIC BUS</p><h2 id="result-title">Status &amp; Tindakan</h2></div>
+            <span class="panel-code">OUT-02</span>
           </div>
+
           <div class="empty-state" id="empty-state">
-            <span class="empty-rule" aria-hidden="true"></span>
-            <strong>Belum ada hasil</strong>
-            <p>Jalankan diagnosis untuk menampilkan status dan rekomendasi.</p>
+            <div class="idle-indicator"><span class="led" aria-hidden="true"></span> SYSTEM STANDBY</div>
+            <strong>Menunggu pembacaan sensor</strong>
+            <p>Jalankan diagnosis untuk menampilkan status mesin dan rekomendasi tindakan.</p>
           </div>
+
           <div class="result-content hidden" id="result-content">
             <div class="status-banner status--normal" id="status-banner">
-              <span class="status-mark" aria-hidden="true"></span>
-              <div class="status-copy"><span>STATUS MESIN</span><strong id="status-label">NORMAL</strong></div>
+              <div class="status-lamp" aria-hidden="true"><span class="status-mark"></span></div>
+              <div class="status-copy">
+                <span>INDIKATOR KONDISI MESIN</span>
+                <strong id="status-label">NORMAL</strong>
+              </div>
               <p id="status-meta"></p>
             </div>
-            <div class="facts-heading"><span>FAKTA TURUNAN</span><span>HASIL PERHITUNGAN</span></div>
-            <div class="fact-grid">
-              <div class="fact-card"><span>Selisih suhu <b>ΔT</b></span><strong id="fact-delta">—</strong><small>K</small></div>
-              <div class="fact-card"><span>Daya <b>P</b></span><strong id="fact-power">—</strong><small>W</small></div>
-              <div class="fact-card"><span>Strain <b>S</b></span><strong id="fact-strain">—</strong><small>Nm·min</small></div>
+
+            <div class="facts-heading">
+              <span>FAKTA TURUNAN</span><span class="facts-heading-note">LIVE CALCULATION</span>
             </div>
+            <div class="fact-grid">
+              <div class="fact-card">
+                <span class="fact-label">Selisih suhu <b>ΔT</b></span>
+                <div class="fact-reading"><strong id="fact-delta">—</strong><small>[K]</small></div>
+                <small class="fact-threshold">HDF: &lt; 8.6 K + RPM &lt; 1,380</small>
+              </div>
+              <div class="fact-card">
+                <span class="fact-label">Daya mekanis <b>P</b></span>
+                <div class="fact-reading"><strong id="fact-power">—</strong><small>[W]</small></div>
+                <small class="fact-threshold">Operasi normal: 3,500–9,000 W</small>
+              </div>
+              <div class="fact-card">
+                <span class="fact-label">Beban strain <b>S</b></span>
+                <div class="fact-reading"><strong id="fact-strain">—</strong><small>[Nm·min]</small></div>
+                <small class="fact-threshold">OSF: L 11k / M 12k / H 13k</small>
+              </div>
+            </div>
+
             <div class="recommendation-block">
-              <h3>Rekomendasi tindakan</h3>
+              <h3><span class="section-marker"></span> TINDAKAN KOREKTIF</h3>
               <ul id="recommendations"></ul>
             </div>
+
             <div class="work-order hidden" id="work-order"></div>
           </div>
           <div class="error-message hidden" id="error-message" role="alert"></div>
         </section>
       </div>
 
-      <!-- Explainable output makes the inferred facts and fired rules auditable. -->
       <section class="panel trace-panel" aria-labelledby="trace-title">
         <div class="trace-heading">
           <div class="panel-heading">
             <div class="heading-index">03</div>
-            <div><h2 id="trace-title">Jejak aturan</h2><p>Forward chaining · fakta turunan dan aturan terpicu</p></div>
+            <div><p class="section-kicker">EVENT LOG / RULE ENGINE</p><h2 id="trace-title">Jejak Inferensi</h2></div>
+            <span class="panel-code">FC-LOG</span>
           </div>
           <span class="trace-count" id="trace-count">MENUNGGU DIAGNOSIS</span>
         </div>
         <div class="trace-body" id="trace-body">
-          <p class="trace-empty">Penjelasan proses inferensi akan muncul di sini.</p>
+          <p class="trace-empty"><span class="terminal-prompt">&gt;_</span> Log evaluasi aturan akan ditampilkan di sini.</p>
         </div>
       </section>
+
       <footer class="page-footer">
-        <span>Forward chaining dua tingkat</span>
-        <span>Work Order ERP pada prototipe ini bersifat simulasi.</span>
+        <span>FORWARD CHAINING <b>·</b> TWO-STAGE INFERENCE</span>
+        <span><i class="footer-led" aria-hidden="true"></i> ERP WORK ORDER / SIMULASI LOKAL</span>
       </footer>
     </main>
   </div>
@@ -172,7 +237,7 @@
         showError(error.message);
       } finally {
         submitButton.disabled = false;
-        submitButton.innerHTML = '<span class="button-glyph" aria-hidden="true">→</span><span>Diagnosis</span>';
+        submitButton.innerHTML = '<span class="button-glyph" aria-hidden="true">▶</span><span>DIAGNOSIS MESIN</span>';
       }
     });
 
@@ -241,6 +306,22 @@
       element.textContent = "";
       element.classList.add("hidden");
     }
+  </script>
+  <script>
+    const demoPresets = {
+      normal: { air_temp: 298.1, process_temp: 308.6, rpm: 1500, torque: 40, tool_wear: 100, product_type: "M" },
+      warning: { air_temp: 298.1, process_temp: 308.6, rpm: 1500, torque: 40, tool_wear: 200, product_type: "M" },
+      failure: { air_temp: 298.1, process_temp: 304, rpm: 1200, torque: 40, tool_wear: 100, product_type: "M" }
+    };
+
+    document.querySelectorAll("[data-preset]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const preset = demoPresets[button.dataset.preset];
+        Object.entries(preset).forEach(([name, value]) => {
+          form.elements.namedItem(name).value = value;
+        });
+      });
+    });
   </script>
 </body>
 </html>
