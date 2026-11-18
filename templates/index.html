@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0f1215">
+  <meta name="theme-color" content="#f8fafc">
   <title>Diagnosis Mesin | Sistem Pakar</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
@@ -32,7 +32,7 @@
         </div>
         <div class="machine-identity">
           <span>UNIT TERPANTAU</span>
-          <strong><i aria-hidden="true"></i> CNC-MILL-01</strong>
+          <strong><i aria-hidden="true"></i> <span id="machine-unit-id">M-001</span></strong>
           <small>MODE OPERASI / DEMO</small>
         </div>
       </section>
@@ -46,6 +46,19 @@
           </div>
 
           <form id="diagnosis-form">
+            <fieldset class="sensor-group">
+              <legend><span class="group-index">ID</span> Identitas Mesin</legend>
+              <div class="form-grid">
+                <label class="field" for="machine_id">
+                  <span class="field-label">ID mesin</span>
+                  <span class="input-shell">
+                    <input id="machine_id" type="text" name="machine_id" value="M-001" maxlength="64" required>
+                    <span class="unit-badge">[ID]</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
             <fieldset class="sensor-group">
               <legend><span class="group-index">A</span> Parameter Termal</legend>
               <div class="form-grid">
@@ -89,10 +102,10 @@
             <fieldset class="sensor-group">
               <legend><span class="group-index">C</span> Kondisi Pahat</legend>
               <div class="form-grid">
-                <label class="field" for="tool_wear">
+                <label class="field" for="wear">
                   <span class="field-label">Akumulasi keausan</span>
                   <span class="input-shell">
-                    <input id="tool_wear" type="number" name="tool_wear" step="any" min="0" value="100" required>
+                    <input id="wear" type="number" name="wear" step="any" min="0" value="100" required>
                     <span class="unit-badge">[MIN]</span>
                   </span>
                 </label>
@@ -175,12 +188,17 @@
               <div class="fact-card">
                 <span class="fact-label">Beban strain <b>S</b></span>
                 <div class="fact-reading"><strong id="fact-strain">—</strong><small>[Nm·min]</small></div>
-                <small class="fact-threshold">OSF: L 11k / M 12k / H 13k</small>
+                <small class="fact-threshold" id="fact-strain-limit">Batas OSF berdasarkan tipe produk</small>
               </div>
             </div>
 
+            <div class="failure-mode-row">
+              <span>KODE MODE TERPICU</span>
+              <strong id="failure-modes">—</strong>
+            </div>
+
             <div class="recommendation-block">
-              <h3><span class="section-marker"></span> TINDAKAN KOREKTIF</h3>
+              <h3><span class="section-marker"></span> TINDAKAN YANG DIREKOMENDASIKAN</h3>
               <ul id="recommendations"></ul>
             </div>
 
@@ -246,16 +264,22 @@
       document.getElementById("empty-state").classList.add("hidden");
       document.getElementById("result-content").classList.remove("hidden");
       const banner = document.getElementById("status-banner");
-      banner.className = `status-banner status--${result.status.toLowerCase()}`;
+      const statusClasses = { NORMAL: "normal", WASPADA: "warning", FAILURE: "failure" };
+      banner.className = `status-banner status--${statusClasses[result.status]}`;
       document.getElementById("status-label").textContent = result.status_label;
       document.getElementById("status-meta").textContent =
         result.status === "NORMAL" ? "Parameter berada dalam rentang aturan." :
-        result.failure_modes.length ? `${result.failure_modes.length} aturan kegagalan terpicu.` :
-        "Ambang peringatan tool wear tercapai.";
+        result.status === "FAILURE" ? `${result.failure_modes.length} mode kegagalan terdeteksi.` :
+        "Ambang peringatan keausan pahat tercapai.";
+      document.getElementById("machine-unit-id").textContent = result.machine_id;
 
       document.getElementById("fact-delta").textContent = numberFormat.format(result.facts.delta_t);
       document.getElementById("fact-power").textContent = numberFormat.format(result.facts.power);
       document.getElementById("fact-strain").textContent = numberFormat.format(result.facts.strain);
+      document.getElementById("fact-strain-limit").textContent =
+        `Batas OSF: ${numberFormat.format(result.facts.strain_limit)} [menit·Nm]`;
+      document.getElementById("failure-modes").textContent =
+        result.triggered_rules.map((rule) => rule.code).join(" · ") || "—";
       document.getElementById("recommendations").innerHTML = result.recommendations
         .map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 
@@ -263,10 +287,18 @@
       if (result.work_order) {
         workOrder.classList.remove("hidden");
         workOrder.innerHTML = `
-          <div class="wo-symbol" aria-hidden="true">WO</div>
-          <div class="wo-copy"><strong>Work Order ERP disiapkan</strong>
-            <span>${escapeHtml(result.work_order.work_order_id)} · ${escapeHtml(result.work_order.description)}</span></div>
-          <span class="wo-priority">${escapeHtml(result.work_order.priority)}</span>`;
+          <div class="wo-header">
+            <div class="wo-title"><span>ERP / WORK ORDER DIBUAT</span><strong>${escapeHtml(result.work_order.wo_id)}</strong></div>
+            <span class="wo-priority">${escapeHtml(result.work_order.priority)}</span>
+          </div>
+          <div class="wo-metadata">
+            <div><span>ID MESIN</span><strong>${escapeHtml(result.work_order.machine_id)}</strong></div>
+            <div><span>MODE</span><strong>${result.work_order.failure_modes.map(escapeHtml).join(" · ")}</strong></div>
+          </div>
+          <div class="wo-actions">
+            <span>TINDAKAN KOREKTIF</span>
+            <ul>${result.work_order.recommended_actions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+          </div>`;
       } else {
         workOrder.classList.add("hidden");
         workOrder.innerHTML = "";
@@ -276,9 +308,13 @@
         `${result.triggered_rules.length} ATURAN TERPICU`;
       document.getElementById("trace-body").innerHTML = result.reasoning_trace.map((item, index) => {
         const isRule = /^R[1-4]$/.test(item.id);
-        const state = isRule ? "TERPICU" : item.id.startsWith("F") ? "DITURUNKAN" : "KESIMPULAN";
+        const state = isRule
+          ? item.triggered ? "TERPICU" : "TIDAK TERPICU"
+          : item.id.startsWith("F") ? "INPUT"
+          : item.id.startsWith("D") ? "DITURUNKAN"
+          : "KESIMPULAN";
         return `
-          <div class="trace-row ${isRule ? "trace-fired" : ""}">
+          <div class="trace-row ${isRule ? "trace-rule" : "trace-fact"} ${item.triggered ? "trace-fired" : ""}">
             <span class="trace-number">${String(index + 1).padStart(2, "0")}</span>
             <div class="trace-detail">
               <strong>${escapeHtml(item.id)} <span>·</span> ${escapeHtml(item.rule)}</strong>
@@ -309,9 +345,9 @@
   </script>
   <script>
     const demoPresets = {
-      normal: { air_temp: 298.1, process_temp: 308.6, rpm: 1500, torque: 40, tool_wear: 100, product_type: "M" },
-      warning: { air_temp: 298.1, process_temp: 308.6, rpm: 1500, torque: 40, tool_wear: 200, product_type: "M" },
-      failure: { air_temp: 298.1, process_temp: 304, rpm: 1200, torque: 40, tool_wear: 100, product_type: "M" }
+      normal: { machine_id: "M-001", air_temp: 298.1, process_temp: 308.6, rpm: 1500, torque: 40, wear: 100, product_type: "M" },
+      warning: { machine_id: "M-001", air_temp: 298.1, process_temp: 308.6, rpm: 1500, torque: 40, wear: 200, product_type: "M" },
+      failure: { machine_id: "M-001", air_temp: 298.1, process_temp: 304, rpm: 1200, torque: 40, wear: 100, product_type: "M" }
     };
 
     document.querySelectorAll("[data-preset]").forEach((button) => {

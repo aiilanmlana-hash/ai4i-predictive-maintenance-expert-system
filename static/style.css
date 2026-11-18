@@ -200,6 +200,10 @@ button[type="submit"]:disabled { cursor: wait; opacity: .7; }
 .fact-reading small { color: var(--muted); font: 8px var(--mono); }
 .fact-threshold { display: block; margin-top: 9px; color: var(--muted); font: 7px/1.5 var(--mono); }
 
+.failure-mode-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 13px; padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+.failure-mode-row > span { color: var(--muted); font: 8px var(--mono); }
+.failure-mode-row > strong { color: #334155; font: 9px var(--mono); text-align: right; }
+
 .recommendation-block { margin-top: 21px; }
 .recommendation-block h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 9px; color: #334155; font: 8px var(--mono); letter-spacing: .3px; }
 .section-marker { width: 5px; height: 5px; border-radius: 50%; background: #94a3b8; }
@@ -208,21 +212,23 @@ button[type="submit"]:disabled { cursor: wait; opacity: .7; }
 
 .work-order {
   position: relative;
-  min-height: 60px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
+  display: grid;
+  gap: 14px;
   margin-top: 18px;
-  padding: 12px;
+  padding: 15px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--surface-muted);
 }
-.work-order::before { content: "ERP WORK ORDER"; position: absolute; top: -6px; right: 10px; padding: 0 5px; background: var(--surface); color: var(--muted); font: 7px var(--mono); }
-.wo-symbol { flex: 0 0 auto; padding: 6px; border: 1px solid var(--border); border-radius: 4px; color: #475569; font: 8px var(--mono); font-weight: 700; }
-.wo-copy { min-width: 0; display: grid; gap: 4px; }
-.wo-copy strong { color: #334155; font-size: 9px; font-weight: 600; }
-.wo-copy span { overflow: hidden; color: var(--muted); font: 8px/1.4 var(--mono); text-overflow: ellipsis; white-space: nowrap; }
+.wo-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.wo-title { min-width: 0; display: grid; gap: 5px; }
+.wo-title > span, .wo-metadata > div > span, .wo-actions > span { color: var(--muted); font: 7px var(--mono); letter-spacing: .3px; }
+.wo-title > strong { color: var(--text); font: 11px var(--mono); overflow-wrap: anywhere; }
+.wo-metadata { display: flex; flex-wrap: wrap; gap: 20px; padding-top: 12px; border-top: 1px solid var(--border); }
+.wo-metadata > div { min-width: 90px; display: grid; gap: 5px; }
+.wo-metadata > div > strong { color: #334155; font: 9px var(--mono); }
+.wo-actions { display: grid; gap: 7px; }
+.wo-actions ul { display: grid; gap: 5px; margin: 0; padding-left: 17px; color: #475569; font-size: 9px; line-height: 1.5; }
 .wo-priority { margin-left: auto; padding: 5px 7px; border: 1px solid #fed7aa; border-radius: 4px; background: #fff7ed; color: #9a3412; font: 8px var(--mono); font-weight: 700; }
 .error-message { margin-top: 14px; padding: 10px 12px; border: 1px solid #fecaca; border-radius: 5px; background: var(--red-soft); color: var(--red); font-size: 10px; }
 
